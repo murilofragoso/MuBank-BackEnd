@@ -6,31 +6,37 @@ controller.new = async (req, res) => {
     req.body.date = Date.now();
 
     try{
+        if(req.body.type != "D" && req.body.type != "W"){
+            res.status(500).send("Type not found")
+            return;
+        }
+
         const idUser = req.body.user
         const obj = await Tran.find({user: idUser}).sort('-date');
         if (obj.length > 0) { 
             let lastTransaction = obj[0];
             if(req.body.type == "D")
-                req.body.balanceAfterTransaction = req.body.amount + lastTransaction.balanceAfterTransaction;
+                req.body.balanceAfterTransaction = Number(req.body.amount) + Number(lastTransaction.balanceAfterTransaction);
             else if(req.body.type == "W")
-                req.body.balanceAfterTransaction = lastTransaction.balanceAfterTransaction - req.body.amount;
-            else{
-                res.status(500).send("Type not found")
+                req.body.balanceAfterTransaction = Number(lastTransaction.balanceAfterTransaction) - Number(req.body.amount);
+        }
+        else {
+            if(req.body.type == "D")
+                req.body.balanceAfterTransaction = req.body.amount;
+            else if(req.body.type == "W"){
+                res.status(500).send('Insuficient balance')
                 return;
             }
         }
-        else {
-            res.status(404).end()
+
+        if(req.body.balanceAfterTransaction < 0){
+            res.status(500).send('Insuficient balance')
+            return;
         }
     }
     catch(error){
         console.log(error)
         res.status(500).send(error)
-    }
-
-    if(req.body.balanceAfterTransaction < 0){
-        res.status(500).send('Insuficient balance')
-        return;
     }
     
     try{
@@ -119,6 +125,18 @@ controller.getBalance = async(req, res) => {
         else {
             res.status(404).end()
         }
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).send(error)
+    }
+}
+
+controller.getByUser = async(req, res) => {
+    try{
+        const idUser = req.params.idUser
+        const result = await Tran.find({user: idUser}).sort('-date');
+        res.send(result);
     }
     catch(error){
         console.log(error)

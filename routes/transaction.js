@@ -6,6 +6,7 @@ router.post('/', controller.new)
 router.get('/', controller.list)
 router.get('/:id', controller.getById)
 router.get('/balance/:idUser', controller.getBalance)
+router.get('/user/:idUser', controller.getByUser)
 router.put('/', controller.update)
 router.delete('/', controller.delete)
 
