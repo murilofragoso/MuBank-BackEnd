@@ -10,8 +10,8 @@ controller.new = async (req, res) => {
         return;
     }
 
-    if(Number(req.body.amount) <= 0){
-        res.status(400).send("Amount must be positive")
+    if(Number(req.body.amount) <= 0 || Number(req.body.amount) > 999999999){
+        res.status(400).send("Amount must be betweeen 0 and 999.999.999")
         return;
     }
 
