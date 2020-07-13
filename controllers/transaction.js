@@ -5,11 +5,18 @@ const controller = {}
 controller.new = async (req, res) => {
     req.body.date = Date.now();
 
+    if(req.body.type != "D" && req.body.type != "W"){
+        res.status(400).send("Type not found")
+        return;
+    }
+
+    if(Number(req.body.amount) <= 0){
+        res.status(400).send("Amount must be positive")
+        return;
+    }
+
     try{
-        if(req.body.type != "D" && req.body.type != "W"){
-            res.status(500).send("Type not found")
-            return;
-        }
+        
 
         const idUser = req.body.user
         const obj = await Tran.find({user: idUser}).sort('-date');
@@ -24,13 +31,13 @@ controller.new = async (req, res) => {
             if(req.body.type == "D")
                 req.body.balanceAfterTransaction = req.body.amount;
             else if(req.body.type == "W"){
-                res.status(500).send('Insuficient balance')
+                res.status(400).send('Insuficient balance')
                 return;
             }
         }
 
         if(req.body.balanceAfterTransaction < 0){
-            res.status(500).send('Insuficient balance')
+            res.status(400).send('Insuficient balance')
             return;
         }
     }
